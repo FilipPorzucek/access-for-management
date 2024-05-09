@@ -4,83 +4,75 @@ import { fetchingError } from "../../utils/list-state.type";
 import { json } from "express";
 import { Inject, Injectable } from "@angular/core";
 
-const URL="http://localhost:3006"; 
 
+const API_URL = 'https://apiforproject-a5613-default-rtdb.europe-west1.firebasedatabase.app/';
 
-export type TaskPayload={done?:boolean,name?:string};
+export type TaskPayload = { done?: boolean, name?: string };
 
 @Injectable({
-  providedIn:"root",
+  providedIn: 'root'
 })
+export class TaskService {
+  private URL = API_URL;
 
-
-export class TaskService{
-  private URL="http://localhost:3006";
-  async getAll(){
-    return fetch(`${URL}/tasks`)
-    .then<Task[] | fetchingError>((response)=>{
-      if(response.ok){
-        return response.json();
-      }
-      return{status:response.status, message: response.statusText}
-    })}
-    async update(taskId:number, payload:TaskPayload){
-      return fetch(`${this.URL}/tasks/${taskId}`,{
-        method:'PATCH',
-        headers:{
-          'Content-Type':'application/json',
-
-        },
-        body:JSON.stringify(payload),
-      })
-      .then<Task | Error>(response=>{
-        if(response.ok){
-          return response.json()
+  async getAll(): Promise<Task[] | { status: number, message: string }> {
+    console.log("tekst,",this.URL);
+    return fetch(`${this.URL}`)
+      .then(response => {
+        if (response.ok) {
+          return response.json();
+        } else {
+          return { status: response.status, message: response.statusText };
         }
-        return new Error("Cant update task")
-      })
-    }
-       
-    async add(name:string)
-    {
-      return fetch(`${URL}/tasks`,{
-      method:`POST`,
-      headers:{
-        'Content-type':'application/json'
-      },
-      body:JSON.stringify({
-        createdAt:new Date().getTime(),
-        name,
-        done:false
-      }as Task)
-    }).then<Task | Error>(response=>{
-      if(response.ok){
-        return response.json()
-      }
-      return new Error('Cant add task');
-    
-    })
+      });
 
-    ;}
-  
-
-  async delete(tasksId: number){
-    return fetch(`${this.URL}/tasks/${tasksId} `,{
-      method:'DELETE'
-    }).then< Error|undefined>(response=>{
-      if(response.ok){
-        return response.json()
-      }
-      return new Error('Cant delete Task');
-    
-    })
   }
 
+  async update(taskId: number, payload: TaskPayload): Promise<Task | Error> {
+    return fetch(`${this.URL}/${taskId}`, {
+      method: 'PATCH',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(payload),
+    })
+      .then(response => {
+        if (response.ok) {
+          return response.json();
+        } else {
+          throw new Error("Can't update task");
+        }
+      });
+  }
+       
+  async add(name: string): Promise<Task | Error> {
+    const taskPayload: TaskPayload = { name, done: false };
+    return fetch(`${this.URL}`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(taskPayload),
+    })
+      .then(response => {
+        if (response.ok) {
+          return response.json();
+        } else {
+          throw new Error("Can't add task");
+        }
+      });
+  }
 
+  async delete(taskId: number): Promise<Error | undefined> {
+    return fetch(`${this.URL}/${taskId}`, {
+      method: 'DELETE',
+    })
+      .then(response => {
+        if (response.ok) {
+          return undefined;
+        } else {
+          throw new Error("Can't delete task");
+        }
+      });
+  }
 }
-
-
-
-
-
-
