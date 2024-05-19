@@ -34,7 +34,7 @@ import { interval } from 'rxjs';
 
         <ng-template #previewModeTemplate>
           <span [class.line-through]="task.done" >
-            {{ task.name }} - {{ task.dueTime }}           
+            {{ task.name }} - {{ task.dueTime }}{{':00'}}          
           </span>
         </ng-template>
        
@@ -74,27 +74,12 @@ export class TaskCardComponent {
 
  
 
-    resetAllTask() {
-      const resetTask = 1200;
-  
-      const currentTime = new Date();
-      const currentHour = currentTime.getHours();
-      const currentMinute = currentTime.getMinutes();
-      
-      const currentTimeNumber = currentHour * 100 + currentMinute;
-      
-      if (currentTimeNumber === resetTask) {
-          this.task.done = false;
-          this.update.emit({ name: this.task.name, done: this.task.done }); 
-      }
-  }
+ 
    
     ngOnInit(){
     
       interval(1000 * 60)
-        .subscribe(() => {
-          this.resetAllTask();
-        });
+    
     }
 
     
